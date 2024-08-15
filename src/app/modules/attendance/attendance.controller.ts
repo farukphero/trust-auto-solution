@@ -54,6 +54,18 @@ const getSingleDateAttendance = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const getSingleAttendance = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await AttendanceServices.getSingleAttendance(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Attendance retrieved successful!',
+    data: result,
+  });
+});
 
 const deleteAttendance = catchAsync(async (req, res) => {
   const result = await AttendanceServices.deleteAttendanceFromDB(req.body);
@@ -70,5 +82,6 @@ export const attendanceController = {
   getTodayAttendance,
   getAllAttendanceByCurrentMonth,
   getSingleDateAttendance,
-  deleteAttendance
+  deleteAttendance,
+  getSingleAttendance
 };

@@ -1,50 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppError';
-import sanitizePayload from '../../middlewares/updateDataValidation';
-import { SearchableFields } from './attendance.const';
 import { TAttendance } from './attendance.interface';
 import { Attendance } from './attendance.model';
 import { Employee } from '../employee/employee.model';
 import mongoose from 'mongoose';
-
-// const createAttendanceIntoDB = async (payload: TAttendance[]) => {
-//   const attendanceIds = payload.map((entry) => entry.employee);
-
-//   attendanceIds.forEach(async (id) => {
-//     const data = payload.find((d) => d.employee === id);
-
-//     const existingEmployee = await Employee.findById(id);
-
-//     if (existingEmployee && data) {
-//       const checkTodaysAttendance = await Attendance.findOneAndUpdate(
-//         {
-//           employee: id,
-//           date: data.date,
-//         },
-//         {
-//           $set: data,
-//         },
-//       );
-//       if (!checkTodaysAttendance) {
-//         const attendance = new Attendance({
-//           ...data,
-//           employee: existingEmployee._id,
-//         });
-
-//         await attendance.save();
-
-//         await Employee.findByIdAndUpdate(
-//           existingEmployee._id,
-//           { $push: { attendance: attendance._id } },
-//           { new: true, runValidators: true },
-//         );
-//       }
-//     }
-//   });
-
-//   return null;
-// };
-
 
 const createAttendanceIntoDB = async (payload: TAttendance[]) => {
   const session = await mongoose.startSession();
@@ -67,7 +26,7 @@ const createAttendanceIntoDB = async (payload: TAttendance[]) => {
           {
             $set: data,
           },
-          { session, new: true, runValidators: true }
+          { session, new: true, runValidators: true },
         );
 
         if (!checkTodaysAttendance) {
@@ -81,7 +40,7 @@ const createAttendanceIntoDB = async (payload: TAttendance[]) => {
           await Employee.findByIdAndUpdate(
             existingEmployee._id,
             { $push: { attendance: attendance._id } },
-            { new: true, runValidators: true, session }
+            { new: true, runValidators: true, session },
           );
         }
       }
@@ -96,7 +55,6 @@ const createAttendanceIntoDB = async (payload: TAttendance[]) => {
     throw error;
   }
 };
-
 
 const getTodayAttendanceFromDB = async () => {
   const parsedDate = new Date();
@@ -281,6 +239,15 @@ const getAllAttendanceByCurrentMonth = async (
   };
 };
 
+const getSingleAttendance = async (employee: string) => {
+  const singleAttendance = await Attendance.find({ employee });
+
+  if (!singleAttendance) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No attendance found');
+  }
+
+  return singleAttendance;
+};
 const getSingleDateAttendance = async (date: string) => {
   const singleAttendance = await Attendance.find({ date });
 
@@ -323,4 +290,5 @@ export const AttendanceServices = {
   getAllAttendanceByCurrentMonth,
   getSingleDateAttendance,
   deleteAttendanceFromDB,
+  getSingleAttendance
 };

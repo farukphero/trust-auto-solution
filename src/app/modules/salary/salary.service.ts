@@ -84,7 +84,6 @@ const createSalaryIntoDB = async (payload: TSalary[]) => {
   return null;
 };
 
- 
 const getSalariesForCurrentMonth = async (searchTerm: string) => {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
@@ -133,9 +132,18 @@ const getSalariesForCurrentMonth = async (searchTerm: string) => {
   return salaryResults;
 };
 
- 
+const getSingleSalary = async (employee: string) => {
+  const singleSalary = await Salary.find({ employee }).populate('employee');
+
+  if (!singleSalary) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'No salary found');
+  }
+
+  return singleSalary;
+};
 
 export const SalaryServices = {
   createSalaryIntoDB,
   getSalariesForCurrentMonth,
+  getSingleSalary,
 };

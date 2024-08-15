@@ -4,12 +4,42 @@ import { SearchableFields } from './bill-pay.const';
 import sanitizePayload from '../../middlewares/updateDataValidation';
 import { TBillPay } from './bill-pay.interface';
 import { BillPay } from './bill-pay.model';
- 
+import { Supplier } from '../supplier/supplier.model';
+import mongoose from 'mongoose';
 
 const createBillPayIntoDB = async (payload: TBillPay) => {
-  const sanitizeData = sanitizePayload(payload);
-  const bill = await BillPay.create(sanitizeData);
-  return bill;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const existingSupplier = await Supplier.findOne({
+      supplierId: payload.supplierId,
+    }).session(session);
+
+    if (!existingSupplier) {
+      throw new AppError(StatusCodes.NOT_FOUND, 'Supplier not found');
+    }
+
+    const sanitizeData = sanitizePayload(payload);
+    const bill = await BillPay.create(
+      [
+        {
+          ...sanitizeData,
+          supplier: existingSupplier._id,
+        },
+      ],
+      { session },
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return bill[0];
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
 const getAllBillPaysFromDB = async (
@@ -40,6 +70,17 @@ const getAllBillPaysFromDB = async (
 
   const billPays = await BillPay.aggregate([
     {
+      $lookup: {
+        from: 'suppliers',
+        localField: 'supplier',
+        foreignField: '_id',
+        as: 'supplier',
+      },
+    },
+    {
+      $unwind: '$supplier', // Unwind the array to get a single object
+    },
+    {
       $match: searchQuery,
     },
     {
@@ -65,7 +106,7 @@ const getAllBillPaysFromDB = async (
 };
 
 const getSingleBillPayDetails = async (id: string) => {
-  const singleBillPay = await BillPay.findById(id);
+  const singleBillPay = await BillPay.findById(id).populate("supplier");
 
   if (!singleBillPay) {
     throw new AppError(StatusCodes.NOT_FOUND, 'No bill pay found');

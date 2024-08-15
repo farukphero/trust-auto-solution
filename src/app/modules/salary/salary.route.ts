@@ -10,7 +10,7 @@ router
   .post(salaryController.createSalary)
   .get(salaryController.getSalariesForCurrentMonth);
 
-// router.route('/remove').put(attendanceController.deleteAttendance);
+router.route('/:id').get(salaryController.getSingleSalary);
 
 // router.route('/today').get(attendanceController.getTodayAttendance);
 

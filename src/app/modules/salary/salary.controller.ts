@@ -23,8 +23,20 @@ const getSalariesForCurrentMonth = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleSalary = catchAsync(async (req, res) => {
+  const { id } = req.params;
 
+  const result = await SalaryServices.getSingleSalary(id);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Salary retrieved successful!',
+    data: result,
+  });
+});
 export const salaryController = {
   createSalary,
-  getSalariesForCurrentMonth
+  getSalariesForCurrentMonth,
+  getSingleSalary,
 };

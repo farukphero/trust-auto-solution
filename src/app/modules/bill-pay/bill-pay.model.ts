@@ -3,6 +3,11 @@ import { TBillPay } from './bill-pay.interface';
 
 const billPaySchema: Schema<TBillPay> = new Schema<TBillPay>(
   {
+    supplier: {
+      type: Schema.ObjectId,
+      ref: 'Supplier',
+      required: [true, 'Supplier ID is required'],
+    },
     supplierId: {
       type: String,
       required: [true, 'Supplier ID is required'],

@@ -1,4 +1,7 @@
+import { Types } from 'mongoose';
+
 export interface TBillPay {
+  supplier: Types.ObjectId;
   supplierId: string;
   name: string;
   mobile_number: string;
@@ -20,7 +23,7 @@ export interface TBillPay {
 
   selected_bank: string;
   bank_account_no: string;
-  
+
   check_no: string;
   card_number: string;
 

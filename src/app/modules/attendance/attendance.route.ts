@@ -14,5 +14,6 @@ router.route('/remove').put(attendanceController.deleteAttendance);
 router.route('/today').get(attendanceController.getTodayAttendance);
 
 router.route('/:date').get(attendanceController.getSingleDateAttendance);
+router.route('/single/:id').get(attendanceController.getSingleAttendance);
 
 export const AttendanceRoutes = router;
